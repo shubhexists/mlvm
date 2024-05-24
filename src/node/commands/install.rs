@@ -1,11 +1,11 @@
-use std::{error::Error, path::PathBuf};
+use std::{error::Error, fs, path::PathBuf};
 
 use crate::{
     node::{
         utils::{unix_utils, utils::get_concrete_version, windows_utils},
         BASE_URL,
     },
-    utils::download_file,
+    utils::{download_file, extract_file},
 };
 
 pub fn install(version: &str) {
@@ -33,9 +33,23 @@ pub fn install(version: &str) {
             match download {
                 Ok(_) => {
                     println!("Downloaded to: {:?}", cache_dir);
+                    let extract_path: PathBuf = cache_dir.join("files");
+                    fs::create_dir_all(&extract_path).expect("Cannot create files directory");
+                    let extract =
+                        extract_file(&file_.to_str().unwrap(), &extract_path.to_str().unwrap());
+                    match extract {
+                        Ok(_) => {
+                            println!("Extracted to: {:?}", extract_path);
+                        }
+                        Err(e) => {
+                            println!("{}", e);
+                            panic!("Cannot extract file");
+                        }
+                    }
                 }
                 Err(e) => {
                     println!("{}", e);
+                    panic!("Cannot download file");
                 }
             }
         }
@@ -51,9 +65,23 @@ pub fn install(version: &str) {
             match download {
                 Ok(_) => {
                     println!("Downloaded to: {:?}", cache_dir);
+                    let extract_path: PathBuf = cache_dir.join("files");
+                    fs::create_dir_all(&extract_path).expect("Cannot create files directory");
+                    let extract =
+                        extract_file(&file_.to_str().unwrap(), &extract_path.to_str().unwrap());
+                    match extract {
+                        Ok(_) => {
+                            println!("Extracted to: {:?}", extract_path);
+                        }
+                        Err(e) => {
+                            println!("{}", e);
+                            panic!("Cannot extract file");
+                        }
+                    }
                 }
                 Err(e) => {
                     println!("{}", e);
+                    panic!("Cannot download file");
                 }
             }
         }
