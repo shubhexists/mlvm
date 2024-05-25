@@ -49,6 +49,14 @@ enum Commands {
     #[clap(name = "current")]
     /// Get current version
     Current,
+    #[clap(name = "exec")]
+    /// Execute a file with a specific version
+    Exec {
+        /// Version to use
+        version: Option<String>,
+        /// file to execute
+        path: String,
+    },
 }
 
 fn main() {

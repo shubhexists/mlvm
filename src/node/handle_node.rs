@@ -3,7 +3,7 @@ use dialoguer::{theme::ColorfulTheme, Select};
 use crate::{node::commands::use_version, Commands};
 
 use super::{
-    commands::{current, install, list, remove},
+    commands::{current, exec, install, list, remove},
     utils::utils::{create_node_directory, get_selection_array},
 };
 
@@ -54,6 +54,13 @@ pub fn handle_node(command: Commands) {
         }
         Commands::Current => {
             current::current();
+        }
+        Commands::Exec { version, path } => {
+            let version: String = match version {
+                Some(version) => version,
+                None => "None".to_string(),
+            };
+            exec::exec(&version, &path);
         }
     }
 }
