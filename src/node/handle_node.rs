@@ -10,7 +10,7 @@ pub fn handle_node(command: Commands) {
                 Some(version) => {
                     install::install(&version);
                 }
-                // dialoguer 
+                // dialoguer
                 None => {}
             };
         }
