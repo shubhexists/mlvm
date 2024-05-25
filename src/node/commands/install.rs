@@ -41,7 +41,7 @@ pub fn install(version: &str) {
     let download: Result<(), Box<dyn Error>> = download_file(&download_url, &file_);
     match download {
         Ok(_) => {
-            println!("Downloaded to: {:?}", cache_dir);
+            println!("\nDownloaded to: {:?}", cache_dir);
             let extract_path: PathBuf = temp_dir.join("files");
             fs::create_dir_all(&extract_path).expect("Cannot create files directory");
             let extract: Result<(), Box<dyn Error>> =

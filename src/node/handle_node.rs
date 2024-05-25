@@ -1,38 +1,59 @@
-use crate::Commands;
+use dialoguer::{theme::ColorfulTheme, Select};
 
-use super::{commands::install, utils::utils::create_node_directory};
+use crate::{node::commands::use_version, Commands};
+
+use super::{
+    commands::{current, install, list, remove},
+    utils::utils::{create_node_directory, get_selection_array},
+};
+
+use crate::node::types::LTS;
 
 pub fn handle_node(command: Commands) {
     create_node_directory().expect("Cannot create node directory");
     match command {
         Commands::Install { version } => {
+            let selections_array: Vec<LTS> = get_selection_array();
             match version {
                 Some(version) => {
                     install::install(&version);
                 }
-                // dialoguer
-                None => {}
+                None => {
+                    let selection: usize = Select::with_theme(&ColorfulTheme::default())
+                        .with_prompt("Select a version")
+                        .default(0)
+                        .items(&selections_array)
+                        .interact()
+                        .unwrap();
+
+                    match &selections_array[selection] {
+                        LTS { version, alias: _ } => {
+                            let trim_version: &str = version.trim_start_matches("v");
+                            install::install(&trim_version.to_string());
+                        }
+                    }
+                }
             };
         }
         Commands::Remove { version } => {
-            let version = match version {
+            let version: String = match version {
                 Some(version) => version,
                 None => "None".to_string(),
             };
-            // node::remove(&version);
+            remove::remove(&version);
         }
         Commands::List => {
-            // node::list()
+            list::list();
         }
         Commands::Use { version } => {
-            let version = match version {
+            let version: String = match version {
                 Some(version) => version,
                 None => "None".to_string(),
             };
-            // node::use_version(&version);
+            use_version::use_version(&version);
         }
         Commands::Current => {
-            // node::current()
+            current::current();
         }
     }
 }

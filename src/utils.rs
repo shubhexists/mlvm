@@ -37,7 +37,7 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<(), Box<dyn Error>> {
             .progress_chars("#>-"),
     );
     let mut downloaded: u64 = 0;
-    let mut buffer = [0; 8192];
+    let mut buffer: [u8; 8192] = [0; 8192];
 
     while let Ok(n) = response.read(&mut buffer) {
         if n == 0 {

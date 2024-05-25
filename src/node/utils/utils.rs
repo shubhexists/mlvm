@@ -1,12 +1,14 @@
+use crate::node::types::LTS;
 use regex::Regex;
 use reqwest::blocking::Client;
 use std::{
     error::Error,
-    fs::{self, File},
+    ffi::OsString,
+    fs::{self, DirEntry, File, ReadDir},
     path::PathBuf,
 };
 
-use crate::node::BASE_URL;
+use crate::node::{BASE_URL, LTS};
 
 pub fn get_concrete_version(version: String) -> Result<String, Box<dyn Error>> {
     let version_parts: Vec<&str> = version.split('.').collect();
@@ -105,9 +107,6 @@ pub fn create_node_directory() -> Result<(), Box<dyn Error>> {
     let default_file: PathBuf = aliases_dir.join("default");
     File::create(&default_file)?;
 
-    let main_file: PathBuf = lts_dir.join("*");
-    let _write = fs::write(main_file, "lts/iron")?;
-
     let argon_file: PathBuf = lts_dir.join("argon");
     let _write = fs::write(argon_file, "v4.9.1")?;
 
@@ -142,4 +141,33 @@ pub fn create_node_directory() -> Result<(), Box<dyn Error>> {
     fs::create_dir_all(&cache_bin_dir)?;
 
     Ok(())
+}
+
+pub fn get_selection_array() -> Vec<LTS> {
+    let home_dir: PathBuf = dirs::home_dir().expect("Cannot get home directory");
+    let mvm_dir: PathBuf = home_dir.join(".mvm");
+    let node_dir: PathBuf = mvm_dir.join("node");
+    let aliases_dir: PathBuf = node_dir.join("aliases");
+    let lts_dir: PathBuf = aliases_dir.join("lts");
+    let mut selection_array: Vec<LTS> = Vec::new();
+    selection_array.push(LTS {
+        version: LTS.to_string(),
+        alias: "lts".to_string(),
+    });
+    let files: ReadDir = fs::read_dir(lts_dir).unwrap();
+    for file in files {
+        let file: DirEntry = file.unwrap();
+        let file_name: OsString = file.file_name();
+        let file_name: &str = file_name.to_str().unwrap();
+        if file_name == "lts" {
+            continue;
+        }
+        let file_path: PathBuf = file.path();
+        let content: String = fs::read_to_string(file_path).unwrap();
+        selection_array.push(LTS {
+            version: content,
+            alias: file_name.to_string(),
+        });
+    }
+    selection_array
 }
