@@ -56,7 +56,7 @@ enum Commands {
         version: Option<String>,
         /// file to execute
         path: String,
-    },
+    }
 }
 
 fn main() {

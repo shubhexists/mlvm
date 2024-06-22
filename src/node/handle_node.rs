@@ -13,12 +13,12 @@ pub fn handle_node(command: Commands) {
     create_node_directory().expect("Cannot create node directory");
     match command {
         Commands::Install { version } => {
-            let selections_array: Vec<LTS> = get_selection_array();
             match version {
                 Some(version) => {
                     install::install(&version);
                 }
                 None => {
+                    let selections_array: Vec<LTS> = get_selection_array();
                     let selection: usize = Select::with_theme(&ColorfulTheme::default())
                         .with_prompt("Select a version")
                         .default(0)

@@ -5,18 +5,20 @@ use std::{
     path::PathBuf,
 };
 
+use os_info::Info;
+
 use crate::{
     node::{
-        utils::{unix_utils, utils::get_concrete_version, windows_utils},
+        utils::{unix_utils, utils::get_concrete_install_version, windows_utils},
         BASE_URL,
     },
     utils::{download_file, extract_file},
 };
 
 pub fn install(version: &str) {
-    let os_info = os_info::get();
+    let os_info: Info = os_info::get();
     let version: &str = version.trim_start_matches("v");
-    let version: Result<String, Box<dyn Error>> = get_concrete_version(version.to_string());
+    let version: Result<String, Box<dyn Error>> = get_concrete_install_version(version.to_string());
     let version: String = match version {
         Ok(version) => version,
         Err(e) => {

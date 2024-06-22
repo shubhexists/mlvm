@@ -1,4 +1,5 @@
 use crate::node::types::LTS;
+use os_info::Info;
 use regex::Regex;
 use reqwest::blocking::Client;
 use std::{
@@ -10,7 +11,9 @@ use std::{
 
 use crate::node::{BASE_URL, LTS};
 
-pub fn get_concrete_version(version: String) -> Result<String, Box<dyn Error>> {
+use super::{unix_utils, windows_utils};
+
+pub fn get_concrete_install_version(version: String) -> Result<String, Box<dyn Error>> {
     let version_parts: Vec<&str> = version.split('.').collect();
     if version_parts.len() == 1 {
         let all_versions: Vec<String> = get_available_node_versions(Some(&version)).unwrap();
@@ -170,4 +173,16 @@ pub fn get_selection_array() -> Vec<LTS> {
         });
     }
     selection_array
+}
+
+pub fn create_symbolic_link(version_dir: &PathBuf, version: &str) {
+    let os_info: Info = os_info::get();
+    match os_info.os_type() {
+        os_info::Type::Windows => {
+            windows_utils::create_windows_symbolic_link(version_dir, version);
+        }
+        _ => {
+            unix_utils::create_linux_symbolic_link(version_dir, version);
+        }
+    }
 }
