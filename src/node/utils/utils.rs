@@ -1,4 +1,6 @@
+use super::{unix_utils, windows_utils};
 use crate::node::types::LTS;
+use crate::node::{BASE_URL, LTS};
 use os_info::Info;
 use regex::Regex;
 use reqwest::blocking::Client;
@@ -6,12 +8,9 @@ use std::{
     error::Error,
     ffi::OsString,
     fs::{self, DirEntry, File, ReadDir},
+    io,
     path::PathBuf,
 };
-
-use crate::node::{BASE_URL, LTS};
-
-use super::{unix_utils, windows_utils};
 
 pub fn get_concrete_install_version(version: String) -> Result<String, Box<dyn Error>> {
     let version_parts: Vec<&str> = version.split('.').collect();
@@ -184,5 +183,79 @@ pub fn create_symbolic_link(version_dir: &PathBuf, version: &str) {
         _ => {
             unix_utils::create_linux_symbolic_link(version_dir, version);
         }
+    }
+}
+
+pub fn get_concrete_use_version(version: &str) -> Result<String, Box<dyn Error>> {
+    let version_parts: Vec<&str> = version.split('.').collect();
+    let versions_dir_path: PathBuf = dirs::home_dir().unwrap().join(".mvm/node").join("versions");
+    let installed_versions: Vec<String> = fs::read_dir(&versions_dir_path)
+        .unwrap()
+        .map(|file: Result<DirEntry, io::Error>| file.unwrap().path())
+        .map(|file: PathBuf| file.file_name().unwrap().to_str().unwrap().to_string())
+        .map(|file: String| file.trim_start_matches("v").to_string())
+        .collect();
+    let splitted: Vec<Vec<&str>> = installed_versions
+        .iter()
+        .map(|ver| ver.split('.').collect())
+        .collect();
+    if version_parts.len() == 1 {
+        let filtered_versions: Vec<Vec<&str>> = splitted
+            .iter()
+            .filter(|vec| vec[0] == version_parts[0])
+            .cloned()
+            .collect();
+        if filtered_versions.len() > 0 {
+            let mut versions: Vec<i32> = Vec::new();
+            let largest_minor_version: i32 = filtered_versions
+                .iter()
+                .map(|ver| ver[1].parse::<i32>().unwrap())
+                .max()
+                .unwrap();
+            for ver in filtered_versions {
+                if ver[1].parse::<i32>().unwrap() == largest_minor_version {
+                    versions.push(ver[2].parse::<i32>().unwrap());
+                }
+            }
+            let largest_patch_version: &i32 = versions.iter().max().unwrap();
+            let final_version: String = format!(
+                "{}.{}.{}",
+                version_parts[0], largest_minor_version, largest_patch_version
+            );
+            return Ok(final_version);
+        } else {
+            return Err(
+                "No Node version is available. Try installing from `mvm node install version` "
+                    .into(),
+            );
+        }
+    } else if version_parts.len() == 2 {
+        let filtered_versions: Vec<Vec<&str>> = splitted
+            .iter()
+            .filter(|vec| vec[0] == version_parts[0] && vec[1] == version_parts[1])
+            .cloned()
+            .collect();
+        if filtered_versions.len() > 0 {
+            let mut versions: Vec<i32> = Vec::new();
+            for ver in filtered_versions {
+                versions.push(ver[2].parse::<i32>().unwrap());
+            }
+            let largest_patch_version: &i32 = versions.iter().max().unwrap();
+            let final_version: String = format!("{}.{}", version_parts[0], largest_patch_version);
+            return Ok(final_version);
+        } else {
+            return Err(
+                "No Node version is available. Try installing from `mvm node install version` "
+                    .into(),
+            );
+        }
+    } else if version_parts.len() == 3 {
+        if installed_versions.contains(&version.to_string()) {
+            return Ok(version.to_string());
+        } else {
+            return Err("Version not found".into());
+        }
+    } else {
+        return Err("Invalid version".into());
     }
 }

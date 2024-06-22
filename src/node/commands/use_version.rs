@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use crate::node::utils::utils::create_symbolic_link;
+use crate::node::utils::utils::{create_symbolic_link, get_concrete_use_version};
 pub fn use_version(version: &str) {
     let version_dir_path: PathBuf = dirs::home_dir()
         .unwrap()
@@ -13,7 +13,6 @@ pub fn use_version(version: &str) {
         return;
     }
 
-    println!("{}", version_dir_path.display());
-
-    create_symbolic_link(&version_dir_path, version)
+    let ver: String = get_concrete_use_version(version).unwrap();
+    create_symbolic_link(&version_dir_path, &ver)
 }

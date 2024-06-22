@@ -17,10 +17,6 @@ pub fn create_windows_symbolic_link(version_dir: &PathBuf, version: &str) {
         panic!("Node version {} not found", version);
     }
 
-    if !bin_dir.exists() {
-        panic!("Node version {} not found", version);
-    }
-
     if link_path.exists() {
         remove_symlink_dir(&link_path).unwrap();
     }

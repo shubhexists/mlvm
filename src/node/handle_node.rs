@@ -12,7 +12,7 @@ use crate::node::types::LTS;
 pub fn handle_node(command: Commands) {
     create_node_directory().expect("Cannot create node directory");
     match command {
-        Commands::Install { version } => {
+        Commands::Install { version, debug } => {
             match version {
                 Some(version) => {
                     install::install(&version);
@@ -35,27 +35,31 @@ pub fn handle_node(command: Commands) {
                 }
             };
         }
-        Commands::Remove { version } => {
+        Commands::Remove { version, debug } => {
             let version: String = match version {
                 Some(version) => version,
                 None => "None".to_string(),
             };
             remove::remove(&version);
         }
-        Commands::List => {
+        Commands::List { debug } => {
             list::list();
         }
-        Commands::Use { version } => {
+        Commands::Use { version, debug } => {
             let version: String = match version {
                 Some(version) => version,
                 None => "None".to_string(),
             };
             use_version::use_version(&version);
         }
-        Commands::Current => {
+        Commands::Current { debug } => {
             current::current();
         }
-        Commands::Exec { version, path } => {
+        Commands::Exec {
+            version,
+            path,
+            debug,
+        } => {
             let version: String = match version {
                 Some(version) => version,
                 None => "None".to_string(),

@@ -30,25 +30,42 @@ enum Commands {
     Install {
         /// Version to install
         version: Option<String>,
+        /// debug flag, to print debug information (-d, --debug)
+        #[clap(short, long)]
+        debug: bool,
     },
     #[clap(name = "remove", alias = "rm")]
     /// Remove a version
     Remove {
         /// Version to remove
         version: Option<String>,
+        /// debug flag, to print debug information (-d, --debug)
+        #[clap(short, long)]
+        debug: bool,
     },
     #[clap(name = "list", alias = "ls")]
     /// List installed versions
-    List,
+    List {
+        /// debug flag, to print debug information (-d, --debug)
+        #[clap(short, long)]
+        debug: bool,
+    },
     #[clap(name = "use")]
     /// Set a version to use
     Use {
         /// Version to use
         version: Option<String>,
+        /// debug flag, to print debug information (-d, --debug)
+        #[clap(short, long)]
+        debug: bool,
     },
     #[clap(name = "current")]
     /// Get current version
-    Current,
+    Current {
+        /// debug flag, to print debug information (-d, --debug)
+        #[clap(short, long)]
+        debug: bool,
+    },
     #[clap(name = "exec")]
     /// Execute a file with a specific version
     Exec {
@@ -56,7 +73,10 @@ enum Commands {
         version: Option<String>,
         /// file to execute
         path: String,
-    }
+        /// debug flag, to print debug information (-d, --debug)
+        #[clap(short, long)]
+        debug: bool,
+    },
 }
 
 fn main() {

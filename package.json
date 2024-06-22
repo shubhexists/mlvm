@@ -1,0 +1,13 @@
+{
+  "name": "mvm",
+  "version": "1.0.0",
+  "description": "A multi-language version manager",
+  "scripts": {
+    "prepare": "husky"
+  },
+  "keywords": [],
+  "author": "",
+  "devDependencies": {
+    "husky": "^9.0.11"
+  }
+}
