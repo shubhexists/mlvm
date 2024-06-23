@@ -1,3 +1,4 @@
+pub mod alias;
 pub mod current;
 pub mod exec;
 pub mod install;

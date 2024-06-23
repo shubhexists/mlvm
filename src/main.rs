@@ -77,6 +77,43 @@ enum Commands {
         #[clap(short, long)]
         debug: bool,
     },
+    #[clap(name = "alias")]
+    /// Add aliases for node versions
+    Alias {
+        #[command(subcommand)]
+        command: AliasCommands,
+    },
+}
+
+#[derive(Subcommand)]
+enum AliasCommands {
+    #[clap(name = "add")]
+    /// Add an alias
+    Add {
+        /// Version to alias
+        version: String,
+        /// Alias to madd
+        alias: String,
+        /// debug flag, to print debug information (-d, --debug)
+        #[clap(short, long)]
+        debug: bool,
+    },
+    #[clap(name = "remove", alias = "rm")]
+    /// Remove an alias
+    Remove {
+        /// Alias to remove
+        alias: String,
+        /// debug flag, to print debug information (-d, --debug)
+        #[clap(short, long)]
+        debug: bool,
+    },
+    #[clap(name = "list")]
+    /// List aliases
+    List {
+        /// debug flag, to print debug information (-d, --debug)
+        #[clap(short, long)]
+        debug: bool,
+    },
 }
 
 fn main() {

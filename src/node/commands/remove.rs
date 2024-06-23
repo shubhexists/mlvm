@@ -4,7 +4,7 @@ use std::{
     path::PathBuf,
 };
 
-pub fn remove(version: &str) {
+pub fn remove(version: &str, debug: bool) {
     let versions_dir_path: PathBuf = dirs::home_dir().unwrap().join(".mvm/node").join("versions");
     let installed_versions: Vec<String> = fs::read_dir(&versions_dir_path)
         .unwrap()

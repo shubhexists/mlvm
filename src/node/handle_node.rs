@@ -1,6 +1,6 @@
 use dialoguer::{theme::ColorfulTheme, Select};
 
-use crate::{node::commands::use_version, Commands};
+use crate::{node::commands::use_version, AliasCommands, Commands};
 
 use super::{
     commands::{current, exec, install, list, remove},
@@ -15,7 +15,7 @@ pub fn handle_node(command: Commands) {
         Commands::Install { version, debug } => {
             match version {
                 Some(version) => {
-                    install::install(&version);
+                    install::install(&version, debug);
                 }
                 None => {
                     let selections_array: Vec<LTS> = get_selection_array();
@@ -29,7 +29,7 @@ pub fn handle_node(command: Commands) {
                     match &selections_array[selection] {
                         LTS { version, alias: _ } => {
                             let trim_version: &str = version.trim_start_matches("v");
-                            install::install(&trim_version.to_string());
+                            install::install(&trim_version.to_string(), debug);
                         }
                     }
                 }
@@ -40,10 +40,10 @@ pub fn handle_node(command: Commands) {
                 Some(version) => version,
                 None => "None".to_string(),
             };
-            remove::remove(&version);
+            remove::remove(&version, debug);
         }
         Commands::List { debug } => {
-            list::list();
+            list::list(debug);
         }
         Commands::Use { version, debug } => {
             let version: String = match version {
@@ -53,7 +53,7 @@ pub fn handle_node(command: Commands) {
             use_version::use_version(&version);
         }
         Commands::Current { debug } => {
-            current::current();
+            current::current(debug);
         }
         Commands::Exec {
             version,
@@ -64,7 +64,16 @@ pub fn handle_node(command: Commands) {
                 Some(version) => version,
                 None => "None".to_string(),
             };
-            exec::exec(&version, &path);
+            exec::exec(&version, &path, debug);
         }
+        Commands::Alias { command } => match command {
+            AliasCommands::Add {
+                version,
+                alias,
+                debug,
+            } => {}
+            AliasCommands::Remove { alias, debug } => {}
+            AliasCommands::List { debug } => {}
+        },
     }
 }

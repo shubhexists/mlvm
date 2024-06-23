@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use std::process::{Command, Output};
 
-pub fn exec(version: &str, file_path: &str) {
+pub fn exec(version: &str, file_path: &str, debug: bool) {
     println!("{file_path}");
     let version_dir_path: PathBuf = dirs::home_dir()
         .unwrap()
