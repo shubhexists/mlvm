@@ -1,21 +1,22 @@
-use dialoguer::{theme::ColorfulTheme, Select};
-
-use crate::{node::commands::use_version, AliasCommands, Commands};
-
 use super::{
     commands::{alias, current, exec, install, list, remove},
     utils::{lts::LtsAliases, utils::create_node_directory},
 };
-
 use crate::node::types::LTS;
+use crate::{node::commands::use_version, AliasCommands, Commands};
+use dialoguer::{theme::ColorfulTheme, Select};
 
 pub fn handle_node(command: Commands) {
     create_node_directory().expect("Cannot create node directory");
     match command {
-        Commands::Install { version, debug } => {
+        Commands::Install {
+            version,
+            debug,
+            nodefault,
+        } => {
             match version {
                 Some(version) => {
-                    install::install(&version, debug);
+                    install::install(&version, debug, nodefault);
                 }
                 None => {
                     let selections_array: Vec<LTS> = vec![
@@ -43,7 +44,7 @@ pub fn handle_node(command: Commands) {
                     match &selections_array[selection] {
                         LTS { version, alias: _ } => {
                             let trim_version: &str = version.trim_start_matches("v");
-                            install::install(&trim_version.to_string(), debug);
+                            install::install(&trim_version.to_string(), debug, nodefault);
                         }
                     }
                 }

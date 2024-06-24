@@ -4,6 +4,7 @@ use os_info::Info;
 use regex::Regex;
 use reqwest::blocking::Client;
 use std::{
+    env,
     error::Error,
     fs::{self, DirEntry, File},
     io,
@@ -209,9 +210,26 @@ pub fn check_already_installed(version: &str) -> Result<(), Box<dyn Error>> {
         .map(|file: PathBuf| file.file_name().unwrap().to_str().unwrap().to_string())
         .map(|file: String| file.trim_start_matches("v").to_string())
         .collect();
+    println!("version: {:?}", version);
     if installed_versions.contains(&version.to_string()) {
         return Ok(());
     } else {
         return Err("Version not installed".into());
+    }
+}
+
+pub fn check_path_variable() {
+    let target_path: PathBuf = dirs::home_dir().unwrap().join(".mvm/node/bin");
+    match env::var("PATH") {
+        Ok(paths) => {
+            let paths: Vec<&str> = paths.split(':').collect();
+            if !paths.contains(&target_path.to_str().unwrap()) {
+                println!("PATH variable does not contain mvm node bin directory.");
+                println!("Add to your bashrc to start using mvm:\n\t export PATH=/home/jerry/.mvm/node/bin:$PATH")
+            }
+        }
+        Err(_) => {
+            println!("PATH variable not found in shell configuration");
+        }
     }
 }
