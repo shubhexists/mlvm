@@ -2,7 +2,10 @@ use crate::{
     node::{
         utils::{
             unix_utils,
-            utils::{check_already_installed, get_concrete_install_version},
+            utils::{
+                check_already_installed, check_path_variable, create_symbolic_link,
+                get_concrete_install_version,
+            },
             windows_utils,
         },
         BASE_URL,
@@ -17,13 +20,9 @@ use std::{
     path::PathBuf,
 };
 
-pub fn install(version: &str, debug: bool) {
+pub fn install(version: &str, debug: bool, nodefault: bool) {
     let os_info: Info = os_info::get();
     let version: &str = version.trim_start_matches("v");
-    if let Ok(_) = check_already_installed(version) {
-        println!("Version {} is already installed", version);
-        return;
-    }
     let version: Result<String, Box<dyn Error>> = get_concrete_install_version(version.to_string());
     let version: String = match version {
         Ok(version) => version,
@@ -32,6 +31,13 @@ pub fn install(version: &str, debug: bool) {
             return;
         }
     };
+    match check_already_installed(&version) {
+        Ok(_) => {
+            println!("Version {} already installed", version);
+            return;
+        }
+        Err(_) => {}
+    }
     let download_url: String = match os_info.os_type() {
         os_info::Type::Windows => windows_utils::create_windows_download_link(BASE_URL, &version),
         _ => unix_utils::create_linux_download_link(BASE_URL, &version),
@@ -83,6 +89,17 @@ pub fn install(version: &str, debug: bool) {
                         fs::rename(&file, &new_file).expect("Cannot move file");
                     }
                     fs::remove_dir_all(&temp_dir).expect("Cannot remove extract directory");
+                    if !nodefault {
+                        create_symbolic_link(&version_dir, &version);
+                        let current_file_path: PathBuf = dirs::home_dir()
+                            .unwrap()
+                            .join(".mvm/node")
+                            .join("aliases")
+                            .join("default");
+                        fs::write(current_file_path, version.clone()).unwrap();
+                        println!("Node Version {} now in use", version);
+                        check_path_variable()
+                    }
                 }
                 Err(e) => {
                     println!("{}", e);

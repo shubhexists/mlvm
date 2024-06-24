@@ -33,6 +33,9 @@ enum Commands {
         /// debug flag, to print debug information (-d, --debug)
         #[clap(short, long)]
         debug: bool,
+        /// Do not set as default
+        #[clap(name = "no-default", short, long)]
+        nodefault: bool,
     },
     #[clap(name = "remove", alias = "rm")]
     /// Remove a version
