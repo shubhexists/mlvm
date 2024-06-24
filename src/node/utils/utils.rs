@@ -1,13 +1,11 @@
 use super::{unix_utils, windows_utils};
-use crate::node::types::LTS;
-use crate::node::{BASE_URL, LTS};
+use crate::node::BASE_URL;
 use os_info::Info;
 use regex::Regex;
 use reqwest::blocking::Client;
 use std::{
     error::Error,
-    ffi::OsString,
-    fs::{self, DirEntry, File, ReadDir},
+    fs::{self, DirEntry, File},
     io,
     path::PathBuf,
 };
@@ -104,6 +102,7 @@ pub fn create_node_directory() -> Result<(), Box<dyn Error>> {
     let node_dir: PathBuf = mvm_dir.join("node");
     let aliases_dir: PathBuf = node_dir.join("aliases");
 
+    fs::create_dir_all(&aliases_dir)?;
     let default_file: PathBuf = aliases_dir.join("default");
     File::create(&default_file)?;
 
@@ -114,35 +113,6 @@ pub fn create_node_directory() -> Result<(), Box<dyn Error>> {
     fs::create_dir_all(&cache_bin_dir)?;
 
     Ok(())
-}
-
-pub fn get_selection_array() -> Vec<LTS> {
-    let home_dir: PathBuf = dirs::home_dir().expect("Cannot get home directory");
-    let mvm_dir: PathBuf = home_dir.join(".mvm");
-    let node_dir: PathBuf = mvm_dir.join("node");
-    let aliases_dir: PathBuf = node_dir.join("aliases");
-    let lts_dir: PathBuf = aliases_dir.join("lts");
-    let mut selection_array: Vec<LTS> = Vec::new();
-    selection_array.push(LTS {
-        version: LTS.to_string(),
-        alias: "lts".to_string(),
-    });
-    let files: ReadDir = fs::read_dir(lts_dir).unwrap();
-    for file in files {
-        let file: DirEntry = file.unwrap();
-        let file_name: OsString = file.file_name();
-        let file_name: &str = file_name.to_str().unwrap();
-        if file_name == "lts" {
-            continue;
-        }
-        let file_path: PathBuf = file.path();
-        let content: String = fs::read_to_string(file_path).unwrap();
-        selection_array.push(LTS {
-            version: content,
-            alias: file_name.to_string(),
-        });
-    }
-    selection_array
 }
 
 pub fn create_symbolic_link(version_dir: &PathBuf, version: &str) {

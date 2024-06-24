@@ -6,6 +6,12 @@ use std::{
 
 pub fn list(debug: bool) {
     let versions_dir_path: PathBuf = dirs::home_dir().unwrap().join(".mvm/node").join("versions");
+    if debug {
+        println!(
+            "Getting a list of versions from: {}",
+            versions_dir_path.display()
+        );
+    }
     let installed_versions: Vec<String> = fs::read_dir(&versions_dir_path)
         .unwrap()
         .map(|file: Result<DirEntry, io::Error>| file.unwrap().path())

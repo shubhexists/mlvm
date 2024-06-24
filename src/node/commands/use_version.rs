@@ -1,7 +1,7 @@
 use std::{fs, path::PathBuf};
 
 use crate::node::utils::utils::{create_symbolic_link, get_concrete_use_version};
-pub fn use_version(version: &str) {
+pub fn use_version(version: &str, debug: bool) {
     let ver: String = get_concrete_use_version(version).unwrap();
     let version_dir_path: PathBuf = dirs::home_dir()
         .unwrap()

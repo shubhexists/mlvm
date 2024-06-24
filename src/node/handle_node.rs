@@ -3,8 +3,8 @@ use dialoguer::{theme::ColorfulTheme, Select};
 use crate::{node::commands::use_version, AliasCommands, Commands};
 
 use super::{
-    commands::{current, exec, install, list, remove},
-    utils::utils::{create_node_directory, get_selection_array},
+    commands::{alias, current, exec, install, list, remove},
+    utils::{lts::LtsAliases, utils::create_node_directory},
 };
 
 use crate::node::types::LTS;
@@ -18,7 +18,21 @@ pub fn handle_node(command: Commands) {
                     install::install(&version, debug);
                 }
                 None => {
-                    let selections_array: Vec<LTS> = get_selection_array();
+                    let selections_array: Vec<LTS> = vec![
+                        LTS {
+                            version: LtsAliases::get_alias(&LtsAliases::IRON).version,
+                            alias: "Lts".to_string(),
+                        },
+                        LtsAliases::get_alias(&LtsAliases::ARGON),
+                        LtsAliases::get_alias(&LtsAliases::BORON),
+                        LtsAliases::get_alias(&LtsAliases::CARBON),
+                        LtsAliases::get_alias(&LtsAliases::DUBNIUM),
+                        LtsAliases::get_alias(&LtsAliases::ERBIUM),
+                        LtsAliases::get_alias(&LtsAliases::FERMIUM),
+                        LtsAliases::get_alias(&LtsAliases::GALLIUM),
+                        LtsAliases::get_alias(&LtsAliases::HYDROGEN),
+                        LtsAliases::get_alias(&LtsAliases::IRON),
+                    ];
                     let selection: usize = Select::with_theme(&ColorfulTheme::default())
                         .with_prompt("Select a version")
                         .default(0)
@@ -50,7 +64,7 @@ pub fn handle_node(command: Commands) {
                 Some(version) => version,
                 None => "None".to_string(),
             };
-            use_version::use_version(&version);
+            use_version::use_version(&version, debug);
         }
         Commands::Current { debug } => {
             current::current(debug);
@@ -71,9 +85,9 @@ pub fn handle_node(command: Commands) {
                 version,
                 alias,
                 debug,
-            } => {}
-            AliasCommands::Remove { alias, debug } => {}
-            AliasCommands::List { debug } => {}
+            } => alias::alias_add(&version, &alias, debug),
+            AliasCommands::Remove { alias, debug } => alias::alias_remove(&alias, debug),
+            AliasCommands::List { debug } => alias::alias_list(debug),
         },
     }
 }
