@@ -103,38 +103,9 @@ pub fn create_node_directory() -> Result<(), Box<dyn Error>> {
     let mvm_dir: PathBuf = home_dir.join(".mvm");
     let node_dir: PathBuf = mvm_dir.join("node");
     let aliases_dir: PathBuf = node_dir.join("aliases");
-    let lts_dir: PathBuf = aliases_dir.join("lts");
-    fs::create_dir_all(&lts_dir)?;
 
     let default_file: PathBuf = aliases_dir.join("default");
     File::create(&default_file)?;
-
-    let argon_file: PathBuf = lts_dir.join("argon");
-    let _write = fs::write(argon_file, "v4.9.1")?;
-
-    let boron_file: PathBuf = lts_dir.join("boron");
-    let _write = fs::write(boron_file, "v6.17.1")?;
-
-    let carbon_file: PathBuf = lts_dir.join("carbon");
-    let _write = fs::write(carbon_file, "v8.17.0")?;
-
-    let dubnium_file: PathBuf = lts_dir.join("dubnium");
-    let _write = fs::write(dubnium_file, "v10.24.1")?;
-
-    let erbium_file: PathBuf = lts_dir.join("erbium");
-    let _write = fs::write(erbium_file, "v12.22.12")?;
-
-    let fermium_file: PathBuf = lts_dir.join("fermium");
-    let _write = fs::write(fermium_file, "v14.21.3")?;
-
-    let gallium_file: PathBuf = lts_dir.join("gallium");
-    let _write = fs::write(gallium_file, "v16.20.2")?;
-
-    let hydrogen_file: PathBuf = lts_dir.join("hydrogen");
-    let _write = fs::write(hydrogen_file, "v18.20.3")?;
-
-    let iron_file: PathBuf = lts_dir.join("iron");
-    let _write = fs::write(iron_file, "v20.13.1")?;
 
     let versions_dir: PathBuf = node_dir.join("versions");
     fs::create_dir_all(&versions_dir)?;
@@ -197,19 +168,19 @@ pub fn get_concrete_use_version(version: &str) -> Result<String, Box<dyn Error>>
         .collect();
     let splitted: Vec<Vec<&str>> = installed_versions
         .iter()
-        .map(|ver| ver.split('.').collect())
+        .map(|ver: &String| ver.split('.').collect())
         .collect();
     if version_parts.len() == 1 {
         let filtered_versions: Vec<Vec<&str>> = splitted
             .iter()
-            .filter(|vec| vec[0] == version_parts[0])
+            .filter(|vec: &&Vec<&str>| vec[0] == version_parts[0])
             .cloned()
             .collect();
         if filtered_versions.len() > 0 {
             let mut versions: Vec<i32> = Vec::new();
             let largest_minor_version: i32 = filtered_versions
                 .iter()
-                .map(|ver| ver[1].parse::<i32>().unwrap())
+                .map(|ver: &Vec<&str>| ver[1].parse::<i32>().unwrap())
                 .max()
                 .unwrap();
             for ver in filtered_versions {
@@ -232,7 +203,7 @@ pub fn get_concrete_use_version(version: &str) -> Result<String, Box<dyn Error>>
     } else if version_parts.len() == 2 {
         let filtered_versions: Vec<Vec<&str>> = splitted
             .iter()
-            .filter(|vec| vec[0] == version_parts[0] && vec[1] == version_parts[1])
+            .filter(|vec: &&Vec<&str>| vec[0] == version_parts[0] && vec[1] == version_parts[1])
             .cloned()
             .collect();
         if filtered_versions.len() > 0 {
@@ -257,5 +228,20 @@ pub fn get_concrete_use_version(version: &str) -> Result<String, Box<dyn Error>>
         }
     } else {
         return Err("Invalid version".into());
+    }
+}
+
+pub fn check_already_installed(version: &str) -> Result<(), Box<dyn Error>> {
+    let versions_dir_path: PathBuf = dirs::home_dir().unwrap().join(".mvm/node").join("versions");
+    let installed_versions: Vec<String> = fs::read_dir(&versions_dir_path)
+        .unwrap()
+        .map(|file: Result<DirEntry, io::Error>| file.unwrap().path())
+        .map(|file: PathBuf| file.file_name().unwrap().to_str().unwrap().to_string())
+        .map(|file: String| file.trim_start_matches("v").to_string())
+        .collect();
+    if installed_versions.contains(&version.to_string()) {
+        return Ok(());
+    } else {
+        return Err("Version not installed".into());
     }
 }
