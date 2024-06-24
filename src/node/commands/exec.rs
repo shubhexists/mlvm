@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::path::PathBuf;
 use std::process::{Command, Output};
 
@@ -26,11 +27,11 @@ pub fn exec(version: &str, file_path: &str, debug: bool) {
 
     if command_output.status.success() {
         // Convert the output bytes to a UTF-8 string and print it
-        let output_str = String::from_utf8_lossy(&command_output.stdout);
+        let output_str: Cow<str> = String::from_utf8_lossy(&command_output.stdout);
         println!("Output: {}", output_str);
     } else {
         // Print the error message captured from stderr
-        let error_str = String::from_utf8_lossy(&command_output.stderr);
+        let error_str: Cow<str> = String::from_utf8_lossy(&command_output.stderr);
         eprintln!("Error: {}", error_str);
     }
     println!("Version {} is now in use", version);
