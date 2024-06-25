@@ -2,6 +2,9 @@
 `mlvm` is a command line tool that can be used to switch between versions for different languages.
 Drop of a ✨ if you are here. It would mean a lot : )
 
+
+[DEMO.webm](https://github.com/shubhexists/mlvm/assets/110319892/b5a0b3f4-6cb3-4ce4-9635-a31b3f93aa04)
+
 # Features 
 1) Fast, written in Rust
 2) A single binary to control versions of multiple languages, without increasing the space
