@@ -1,7 +1,14 @@
 [package]
-name = "mvm"
+name = "mlvm"
 version = "0.1.0"
 edition = "2021"
+author = "Shubham singh	<github: github.com/shubhexists>"
+description = "A simple, easy to use multiple language version manager"
+license-file = "LICENSE"
+repository = "https://github.com/shubhexists/mvm"
+categories = ["development-tools", "cli", "developer-utility", "version-manager"]
+keywords = ["mvm", "version-manager", "cli", "development-tools", "developer-utility"]
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
