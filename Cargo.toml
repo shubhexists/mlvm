@@ -1,5 +1,5 @@
 [package]
-name = "mvm"
+name = "mlvm"
 version = "0.1.0"
 edition = "2021"
 author = "Shubham singh	<github: github.com/shubhexists>"

@@ -668,7 +668,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "mvm"
+name = "mlvm"
 version = "0.1.0"
 dependencies = [
  "clap",
