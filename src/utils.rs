@@ -1,15 +1,12 @@
+use flate2::read::GzDecoder;
+use indicatif::ProgressBar;
+use std::io::Read;
 use std::{
     error::Error,
     fs::{self, File},
     io::Write,
     path::PathBuf,
 };
-
-use flate2::read::GzDecoder;
-use indicatif::ProgressBar;
-use reqwest::blocking::Client;
-use reqwest::header::CONTENT_LENGTH;
-use std::io::Read;
 use tar::Archive;
 use xz2::read::XzDecoder;
 
@@ -21,13 +18,10 @@ pub fn create_mvm_directory() -> Result<(), Box<dyn Error>> {
 }
 
 pub fn download_file(url: &str, path: &PathBuf) -> Result<(), Box<dyn Error>> {
-    let client: Client = Client::new();
-    let mut response: reqwest::blocking::Response = client.get(url).send()?;
+    let response: ureq::Response = ureq::get(url).call()?;
     let total_size = response
-        .headers()
-        .get(CONTENT_LENGTH)
+        .header("content-length")
         .ok_or("Response doesn't include the content length")?
-        .to_str()?
         .parse::<u64>()?;
     let mut file: File = File::create(path)?;
     let pb: ProgressBar = ProgressBar::new(total_size);
@@ -36,10 +30,13 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<(), Box<dyn Error>> {
             .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {bytes}/{total_bytes} ({eta})")?
             .progress_chars("#>-"),
     );
+
     let mut downloaded: u64 = 0;
     let mut buffer: [u8; 8192] = [0; 8192];
 
-    while let Ok(n) = response.read(&mut buffer) {
+    let mut reader = response.into_reader();
+
+    while let Ok(n) = reader.read(&mut buffer) {
         if n == 0 {
             break;
         }

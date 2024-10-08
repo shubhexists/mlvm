@@ -2,7 +2,6 @@ use super::{unix_utils, windows_utils};
 use crate::node::BASE_URL;
 use os_info::Info;
 use regex::Regex;
-use reqwest::blocking::Client;
 use std::{
     env,
     error::Error,
@@ -70,9 +69,8 @@ pub fn get_concrete_install_version(version: String) -> Result<String, Box<dyn E
 
 fn get_available_node_versions(version: Option<&String>) -> Result<Vec<String>, Box<dyn Error>> {
     let url: &str = BASE_URL;
-    let client: Client = Client::new();
-    let response: reqwest::blocking::Response = client.get(url).send()?;
-    let body: String = response.text()?;
+    let response: ureq::Response = ureq::get(url).call()?;
+    let body: String = response.into_string()?;
     let re: Regex = Regex::new(r#"href="v(\d+\.\d+\.\d+)/""#)?;
     let mut versions: Vec<String> = Vec::new();
 
@@ -102,20 +100,35 @@ pub fn create_node_directory() -> Result<(), Box<dyn Error>> {
     let mvm_dir: PathBuf = home_dir.join(".mvm");
     let node_dir: PathBuf = mvm_dir.join("node");
     let aliases_dir: PathBuf = node_dir.join("aliases");
-
-    fs::create_dir_all(&aliases_dir)?;
     let default_file: PathBuf = aliases_dir.join("default");
-    File::create(&default_file)?;
-
     let versions_dir: PathBuf = node_dir.join("versions");
-    fs::create_dir_all(&versions_dir)?;
-
     let cache_bin_dir: PathBuf = node_dir.join(".cache/bin");
-    fs::create_dir_all(&cache_bin_dir)?;
 
+    if !mvm_dir.exists() {
+        fs::create_dir_all(&mvm_dir)?;
+    }
+
+    if !node_dir.exists() {
+        fs::create_dir_all(&node_dir)?;
+    }
+
+    if !aliases_dir.exists() {
+        fs::create_dir_all(&aliases_dir)?;
+    }
+
+    if !default_file.exists() {
+        File::create(&default_file)?;
+    }
+
+    if !versions_dir.exists() {
+        fs::create_dir_all(&versions_dir)?;
+    }
+
+    if !cache_bin_dir.exists() {
+        fs::create_dir_all(&cache_bin_dir)?;
+    }
     Ok(())
 }
-
 pub fn create_symbolic_link(version_dir: &PathBuf, version: &str) {
     let os_info: Info = os_info::get();
     match os_info.os_type() {
@@ -219,13 +232,19 @@ pub fn check_already_installed(version: &str) -> Result<(), Box<dyn Error>> {
 }
 
 pub fn check_path_variable() {
-    let target_path: PathBuf = dirs::home_dir().unwrap().join(".mvm/node/bin");
+    let home_dir = dirs::home_dir().unwrap();
+    let target_path: PathBuf = home_dir.join(".mvm/node/bin");
+
     match env::var("PATH") {
         Ok(paths) => {
             let paths: Vec<&str> = paths.split(':').collect();
             if !paths.contains(&target_path.to_str().unwrap()) {
+                let home_dir_str: &str = home_dir.to_str().unwrap();
                 println!("PATH variable does not contain mvm node bin directory.");
-                println!("Add to your bashrc to start using mvm:\n\t export PATH=/home/jerry/.mvm/node/bin:$PATH")
+                println!(
+                    "Add to your bashrc to start using mvm:\n\t export PATH={}/.mvm/node/bin:$PATH",
+                    home_dir_str
+                );
             }
         }
         Err(_) => {
